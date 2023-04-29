@@ -77,8 +77,7 @@ public class MainActivity2 extends AppCompatActivity {
     private void setupEvents(JsonArray event_array){
         for (JsonElement event:event_array){
             JsonObject e = event.getAsJsonObject();
-            eventsRow.add(new eventRowModel(
-                    ));
+
         }
     }
 }

@@ -1,16 +1,24 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -21,14 +29,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link FirstFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FirstFragment extends Fragment {
+public class FirstFragment extends Fragment implements TextWatcher {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -38,6 +52,10 @@ public class FirstFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private AutoCompleteTextView autoCompleteTextView;
+    private ArrayAdapter<String> adapter;
+    private RequestQueue requestQueue;
+    private ProgressBar progressBar;
 
     public FirstFragment() {
         // Required empty public constructor
@@ -82,7 +100,7 @@ public class FirstFragment extends Fragment {
         EditText distance = view.findViewById(R.id.distance);
         EditText location = view.findViewById(R.id.location);
         Switch auto_detect = view.findViewById(R.id.autoDetect);
-//        TextView textView = findViewById(R.id.location_label);
+//        TextView textView = view.findViewById(R.id.location_label);
         Log.d("ewws",Boolean.toString(auto_detect.isChecked()));
         if(auto_detect.isChecked()){
             StringRequest stringRequest = new StringRequest(Request.Method.GET,"https://ipinfo.io?token=27876ba56b3792",new Response.Listener<String>() {
@@ -96,7 +114,8 @@ public class FirstFragment extends Fragment {
                             "&location=" + location.getText().toString()+
                             "&auto-detect="+Boolean.toString(auto_detect.isChecked())+
                             "&loc="+ ip_info.get("loc").getAsString();
-                    StringRequest searchRequest = new StringRequest(Request.Method.GET,search_url,new Response.Listener<String>() {
+                    String search_text = "https://node-vibhuti123.wl.r.appspot.com/tasks?keyword=usc&distance=&category=&location=los angeles&auto_detect=false&loc=34.0522342,-118.2436849";
+                    StringRequest searchRequest = new StringRequest(Request.Method.GET,search_text,new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             // Display the first 500 characters of the response string.
@@ -106,9 +125,21 @@ public class FirstFragment extends Fragment {
 
                             //textView.setText("Response is: " + response);
                             JsonObject search_result = gson.fromJson(response, JsonObject.class);
-                            Intent intent = new Intent(getContext(), MainActivity2.class);
+                            Intent intent = new Intent(getContext(), tableFragment.class);
                             intent.putExtra("data", response);
-                            startActivity(intent);
+                            tableFragment nextFrag= new tableFragment();
+                            Fragment this_one = getActivity().getSupportFragmentManager().findFragmentById(R.id.searchf);
+                            getActivity().getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .hide(this_one)
+                                    .commit();
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .remove(FirstFragment.this)
+                                    .replace(((ViewGroup)getView().getParent()).getId(), nextFrag, "findThisFragment")
+                                    .addToBackStack(null)
+                                    .commit();
+//                                getView().setVisibility(View.GONE);
+//                            startActivity(intent);
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -136,14 +167,101 @@ public class FirstFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_first, container, false);
-//        Button search = view.findViewById(R.id.search);
+        Button search = view.findViewById(R.id.search);
+        Switch auto_detect = view.findViewById(R.id.autoDetect);
+        autoCompleteTextView = view.findViewById(R.id.autoCompleteKeyword);
+        autoCompleteTextView.addTextChangedListener(this);
+        progressBar = view.findViewById(R.id.progressBar);
+        requestQueue = Volley.newRequestQueue(getContext());
+        Picasso picasso = Picasso.get();
+        Uri image_uri = Uri.parse("https://s1.ticketm.net/dam/a/87a/d29e1273-e290-48e1-b432-4e62e3ab987a_1256621_ARTIST_PAGE_3_2.jpg");
+        ImageView test = view.findViewById(R.id.test_image);
+        picasso.load(image_uri).into(test);
+        auto_detect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                autoDetect(view,auto_detect);
+                // do something, the isChecked will be
+                // true if the switch is in the On position
+            }
+        });
 //        search.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                Log.d("BUTTONS", "User tapped the Supabutton");
-//                //searchEvent(v);
-//            }
-//        });
+////            public void onClick(View v) {
+////                Log.d("BUTTONS", "User tapped the Supabutton");
+//////                searchEvent(v);
+////            }
+////        });
         return view;
+
+    }
+    private void autoDetect(View view,Switch auto_detect){
+        EditText location = view.findViewById(R.id.location);
+        if(auto_detect.isChecked()){
+            location.setVisibility(View.GONE);
+        }
+        else{
+            location.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+    private void populateAutoCompleteTextView(List<String> data) {
+        Log.d("POPULATE", data.toString());
+        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, data);
+        autoCompleteTextView.setAdapter(adapter);
+    }
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        Gson gson = new Gson();
+        String url = "https://node-vibhuti123.wl.r.appspot.com/suggest?keyword=" + s.toString();
+
+
+        progressBar.setVisibility(View.VISIBLE);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Parse the API response
+//                        String[] data = parseApiResponse(response);
+                        JsonObject suggest_response = gson.fromJson(response, JsonObject.class);
+                        if(suggest_response.has("_embedded")){
+                            JsonObject embeddedObj = suggest_response.get("_embedded").getAsJsonObject();
+                            JsonArray attractionsArray  = embeddedObj.getAsJsonArray("attractions");
+                            List<String> attractionNames = new ArrayList<>();
+                            for (JsonElement element : attractionsArray) {
+                                JsonObject attractionObj = element.getAsJsonObject();
+
+                                // Extract the desired keys from the attractionObj
+                                String name = attractionObj.get("name").getAsString();
+
+                                // Add the extracted values to the respective lists
+                                attractionNames.add(name);
+
+                            }
+                            populateAutoCompleteTextView(attractionNames);
+                        }
+
+                        progressBar.setVisibility(View.GONE);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Handle API request error
+                         progressBar.setVisibility(View.GONE);
+                    }
+                });
+
+        requestQueue.add(stringRequest);
+
+    }
+
+
+    @Override
+    public void afterTextChanged(Editable s) {
 
     }
 }

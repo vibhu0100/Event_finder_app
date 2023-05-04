@@ -14,6 +14,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBZCcfa_W18-GfeN5Awolet_4RNaLV_Zuw" />
+        <activity
+            android:name=".MainActivityEvent"
+            android:exported="false" />
         <activity
             android:name=".MainActivity2"
             android:exported="false"

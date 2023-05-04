@@ -3,31 +3,54 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-
+    android:layout_height="match_parent"
+    tools:context=".MainActivityEvent">
 
     <TextView
-        android:id="@+id/appBar"
+        android:id="@+id/eventBar"
         android:layout_width="415dp"
         android:layout_height="72dp"
         android:background="#444743"
+        android:ellipsize="marquee"
         android:gravity="center_vertical"
+        android:marqueeRepeatLimit="marquee_forever"
         android:padding="10sp"
-        android:text="EventFinder"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="@color/green"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
         tools:layout_editor_absoluteX="-2dp" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/eventBarC"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/back_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/green"
+            app:srcCompat="?attr/actionModeCloseDrawable" />
+
+        <TextView
+            android:id="@+id/final_bar"
+            android:layout_width="270dp"
+            android:layout_height="22dp"
+            android:text="Event Name"
+            android:textColor="@color/green"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/back_event"
+            tools:layout_editor_absoluteY="0dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
+        android:id="@+id/tabLayoutEvent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#090909"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBar"
+        app:layout_constraintTop_toBottomOf="@+id/eventBar"
         app:layout_constraintVertical_bias="0.0"
         app:tabGravity="fill"
         app:tabIndicatorColor="#42EC14"
@@ -37,14 +60,16 @@
         tools:layout_editor_absoluteX="0dp" />
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
+        android:id="@+id/viewPagerEvent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="#C8C5C5"
-        android:backgroundTint="#C8C5C5"
+        android:backgroundTint="#02C8C5C5"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/tabLayoutEvent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="2dp" >
 
-
+    </androidx.viewpager2.widget.ViewPager2>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

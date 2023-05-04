@@ -1,0 +1,11 @@
+<resources>
+    <string-array name="spinner_value">
+        <item>All</item>
+        <item>Music</item>
+        <item>Sports
+        </item>
+        <item>Arts and Theatre</item>
+        <item>Films</item>
+        <item>Miscellaneous</item>
+    </string-array>
+</resources>

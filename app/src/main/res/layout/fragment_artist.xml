@@ -14,5 +14,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="10sp"
-        android:paddingBottom="10sp" />
+        android:paddingBottom="10sp"
+        android:visibility="visible">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/no_artist_Data"
+        android:layout_width="343dp"
+        android:layout_height="54dp"
+        android:layout_gravity="center"
+        android:foregroundGravity="center"
+        app:cardBackgroundColor="@color/black"
+        app:cardCornerRadius="9sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/no_event_data"
+            android:layout_width="316dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:foregroundGravity="center"
+            android:gravity="center"
+            android:text="No music related artist details to show"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/green"
+            android:visibility="visible" />
+    </androidx.cardview.widget.CardView>
+
 </FrameLayout>

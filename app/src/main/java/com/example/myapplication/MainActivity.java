@@ -3,7 +3,9 @@ package com.example.myapplication;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,6 +18,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -35,6 +38,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
@@ -51,7 +56,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
     private TabLayout tabLayout;
@@ -66,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
+
 //        fuck_me();
 //        System.out.println(Arrays.stream(fuck).toArray()+"rtre"+fuck.toString()+"dfs"+String.join(","));
         List<Fragment> fragmentList = new ArrayList<>();
@@ -113,7 +122,32 @@ public class MainActivity extends AppCompatActivity {
 //        });
 
     }
-    private void setUpPreferences(){
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("MainActivity", "onResume called");
+
+        // Check for location permission and request if not granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 90009);
+        }
+    }
+    public void clearThings(View view){
+        TextView textView = findViewById(R.id.location_label);
+        RequestQueue queue = Volley.newRequestQueue(this);
+//        EditText keyword = findViewById(R.id.keyword);
+        AutoCompleteTextView keyword = findViewById(R.id.autoCompleteKeyword);
+        EditText distance = findViewById(R.id.distance);
+        EditText location = findViewById(R.id.location);
+        Switch auto_detect = findViewById(R.id.autoDetect);
+        Spinner category = findViewById(R.id.category);
+        keyword.setText("");
+        location.setText("");
+        category.setSelection(0);
+        auto_detect.setChecked(false);
+        distance.setText("");
+
+
 
     }
     private void autoDetect(View view,Switch auto_detect){
@@ -182,6 +216,18 @@ public class MainActivity extends AppCompatActivity {
     public void validator(View view){
 //        if(TextUtils.keyword)
     }
+    String getCategoryCode(String category){
+        Map<String,String> map = new HashMap<>();
+        map.put("All","");
+        map.put("Music","KZFzniwnSyZfZ7v7nJ");
+        map.put("Sports","KZFzniwnSyZfZ7v7nE");
+        map.put("Art & Theatre","KZFzniwnSyZfZ7v7na");
+        map.put("Film","KZFzniwnSyZfZ7v7nn");
+        map.put("Miscellaneous","KZFzniwnSyZfZ7v7n1");
+
+        return map.get(category);
+
+    }
     public void searchEvent(View view){
         validator(view);
 
@@ -194,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
         EditText distance = findViewById(R.id.distance);
         EditText location = findViewById(R.id.location);
         Switch auto_detect = findViewById(R.id.autoDetect);
+        Spinner category = findViewById(R.id.category);
 
         if(TextUtils.isEmpty(keyword.getText()) || (TextUtils.isEmpty(location.getText()) && !auto_detect.isChecked())){
             Snackbar.make(view,"Please fill all fields",Snackbar.LENGTH_SHORT).show();
@@ -211,11 +258,13 @@ public class MainActivity extends AppCompatActivity {
                                 "&distance=" + distance.getText().toString()+
                                 "&location=" + location.getText().toString()+
                                 "&auto-detect="+Boolean.toString(auto_detect.isChecked())+
+                                "&category="+getCategoryCode(category.getSelectedItem().toString())+
                                 "&loc="+ ip_info.get("loc").getAsString();
+                    System.out.println("searchURL"+search_url);
                     String search_text = "https://node-vibhuti123.wl.r.appspot.com/tasks?keyword=usc&distance=&category=&location=los angeles&auto_detect=false&loc=34.0522342,-118.2436849";
 
 
-                    ticket_master(search_text,queue);
+                    ticket_master(search_url,queue);
 
 
 
@@ -250,6 +299,7 @@ public class MainActivity extends AppCompatActivity {
                             "&distance=" + distance.getText().toString()+
                             "&location=" + location.getText().toString()+
                             "&auto-detect="+Boolean.toString(auto_detect.isChecked())+
+                            "&category="+getCategoryCode(category.getSelectedItem().toString())+
                             "&loc="+locationObject.get("lat").getAsString()+","+locationObject.get("lng").getAsString();
                     String search_text = "https://node-vibhuti123.wl.r.appspot.com/tasks?keyword=usc&distance=&category=&location=los angeles&auto_detect=false&loc=34.0522342,-118.2436849";
 

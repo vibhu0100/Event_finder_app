@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.widget.Switch;
 
@@ -20,6 +22,7 @@ public class eventRowModel {
     public Boolean isFav;
 
 
+
     public eventRowModel(JsonObject event_object) {
 
         this.event_object = event_object;
@@ -27,10 +30,24 @@ public class eventRowModel {
         this.music_flag = false;
         this.isFav=false;
     }
-    public Boolean isFavourite(){
 
-        return false;
+    public Boolean isFavourite(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Favorites", Context.MODE_PRIVATE);
+
+        if (sharedPreferences.contains(event_object.get("id").getAsString())) {
+            // The key exists in SharedPreferences
+            // Perform your logic here
+//            updateFavoriteButton(1);
+            return true;
+        } else {
+            // The key does not exist in SharedPreferences
+            // Perform alternative logic here
+//            updateFavoriteButton(0);
+            return false;
+        }
+//        return false;
     }
+
 
 
 

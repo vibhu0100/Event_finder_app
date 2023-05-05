@@ -123,9 +123,15 @@ public class artistFragment extends Fragment {
 
             System.out.println("Artist_Arrayyyyyyyyyyyyyyy" + artistArray);
             RecyclerView table = view.findViewById(R.id.artist_cycler);
+            table.setVisibility(View.VISIBLE);
+            view.findViewById(R.id.no_artist_Data).setVisibility(View.GONE);
             artist_RecyclerViewAdapter adapter = new artist_RecyclerViewAdapter(artistArray, getContext());
             table.setAdapter(adapter);
             table.setLayoutManager(new LinearLayoutManager(getContext()));
+        }
+        else{
+            view.findViewById(R.id.no_artist_Data).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.artist_cycler).setVisibility(View.GONE);
         }
 
 

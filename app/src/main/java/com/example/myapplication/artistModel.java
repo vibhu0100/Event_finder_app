@@ -15,7 +15,7 @@ public class artistModel {
     public artistModel(JsonObject artist_object){
         this.artist_object = artist_object;
         this.artistObj = artist_object.getAsJsonObject("artists");
-        this.albumObj = artist_object.getAsJsonObject("albums");
+        this.albumObj = artist_object.getAsJsonObject("album");
     }
     public String getId(){
         return artistObj.get("id").getAsString();
@@ -31,7 +31,8 @@ public class artistModel {
     }
     public String getFollowers(){
         try{
-            return artistObj.getAsJsonObject("followers").get("total").getAsString();
+            float x = Float.parseFloat(artistObj.getAsJsonObject("followers").get("total").getAsString());
+            return truncateNumber(x);
 
         }
         catch(Exception e){
@@ -63,21 +64,41 @@ public class artistModel {
             return null;
         }
     }
-    public ArrayList<Uri> getAlbumUrl(){
-        try{
-            ArrayList<Uri> urls = new ArrayList<>();
-            JsonArray albm_arr = artistObj.getAsJsonArray("items");
-            int size = Math.min(albm_arr.size(), 3);
-            for (int i = 0; i < size; i++) {
-                JsonObject x = albm_arr.get(i).getAsJsonObject();
-                String a = x.getAsJsonArray("images").get(0).getAsJsonObject().get("url").getAsString();
-                urls.add(Uri.parse(a));
-            }
-            return urls;
-        }catch(Exception e){
-            return null;
+    public String truncateNumber(float floatNumber) {
+        long million = 1000000L;
+        long billion = 1000000000L;
+        long trillion = 1000000000000L;
+        long number = Math.round(floatNumber);
+        if ((number >= million) && (number < billion)) {
+            float fraction = calculateFraction(number, million);
+            return Float.toString(fraction) + "M";
+        } else if ((number >= billion) && (number < trillion)) {
+            float fraction = calculateFraction(number, billion);
+            return Float.toString(fraction) + "B";
         }
+        return Long.toString(number);
+    }
 
+    public float calculateFraction(long number, long divisor) {
+        long truncate = (number * 10L + (divisor / 2L)) / divisor;
+        float fraction = (float) truncate * 0.10F;
+        return fraction;
+    }
+    public ArrayList<Uri> getAlbumUrl() {
+
+        ArrayList<Uri> urls = new ArrayList<>();
+        JsonArray albm_arr = albumObj.getAsJsonArray("items");
+        System.out.println("image_url : "+albumObj.getAsJsonArray("items").size());
+        int size = Math.min(albm_arr.size(), 3);
+        for (int i = 0; i < size; i++) {
+            JsonObject x = albm_arr.get(i).getAsJsonObject();
+            String a = x.getAsJsonArray("images").get(0).getAsJsonObject().get("url").getAsString();
+            urls.add(Uri.parse(a));
+
+
+
+        }
+        return urls;
     }
 
 

@@ -17,10 +17,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -41,9 +43,13 @@ public class venueFragment extends Fragment implements OnMapReadyCallback {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    venueModel globalVenue;
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
     private MapView mMapView;
-    public String[] lat_long = {"0","0"};
+    double lat = 34.112;
+    double lng = -118.23;
+    Marker mapPin;
+    GoogleMap googleMap;
     public venueFragment() {
         // Required empty public constructor
     }
@@ -78,37 +84,42 @@ public class venueFragment extends Fragment implements OnMapReadyCallback {
         RequestQueue queue = Volley.newRequestQueue(getContext());
         Gson gson = new Gson();
 
-        String geo_url = "https://maps.googleapis.com/maps/api/geocode/json?"+
-                "address="+address+
-                "&key=AIzaSyBZCcfa_W18-GfeN5Awolet_4RNaLV_Zuw";
-        StringRequest geoRequest = new StringRequest(Request.Method.GET,geo_url,new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                // Display the first 500 characters of the response string.
 
-                JsonObject geo_code = gson.fromJson(response, JsonObject.class);
-                JsonArray resultsArray = geo_code.getAsJsonArray("results");
-                JsonObject resultsObject = resultsArray.get(0).getAsJsonObject();
-                JsonObject geometryObject = resultsObject.getAsJsonObject("geometry");
-                JsonObject locationObject = geometryObject.getAsJsonObject("location");
+
+//            geocoding(venue.getAddress());
+            String geo_url = "https://maps.googleapis.com/maps/api/geocode/json?"+
+                    "address="+address+
+                    "&key=AIzaSyBZCcfa_W18-GfeN5Awolet_4RNaLV_Zuw";
+
+            StringRequest geoRequest = new StringRequest(Request.Method.GET, geo_url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    // Display the first 500 characters of the response string.
+
+                    JsonObject geo_code = gson.fromJson(response, JsonObject.class);
+                    JsonArray resultsArray = geo_code.getAsJsonArray("results");
+                    JsonObject resultsObject = resultsArray.get(0).getAsJsonObject();
+                    JsonObject geometryObject = resultsObject.getAsJsonObject("geometry");
+                    JsonObject locationObject = geometryObject.getAsJsonObject("location");
 
 //                    String loca = geo_code.getAsJsonArray("results").get(0).getAsJsonObject().
 //                            getAsJsonObject("geometry").get("location").getAsString();
-                Log.d("find",locationObject.get("lat").getAsString());
-                lat_long[0] = locationObject.get("lat").getAsString();
-                lat_long[1] = locationObject.get("lng").getAsString();
+                    Log.d("find", locationObject.get("lat").getAsString());
+                    lat = Double.parseDouble(locationObject.get("lat").getAsString());
+                   lng = Double.parseDouble(locationObject.get("lng").getAsString());
+                   updateLatLongDynamic();
 
 
 
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
 
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+                }
+            });
+            queue.add(geoRequest);
 
-            }
-        });
-        queue.add(geoRequest);
 //        return lat_long;
     }
 
@@ -123,6 +134,7 @@ public class venueFragment extends Fragment implements OnMapReadyCallback {
         System.out.println("VenueData in "+data);
         JsonObject x = gson.fromJson(data,JsonObject.class);
         venueModel venue = new venueModel(x);
+        globalVenue = venue;
         if(venue.getAddress()!=null) {
             geocoding(venue.getAddress());
         }
@@ -143,6 +155,8 @@ public class venueFragment extends Fragment implements OnMapReadyCallback {
         if(venue.getVenueName() != null){
             TextView name = view.findViewById(R.id.venue_name);
             name.setText(venue.getVenueName());
+            TextView f = view.findViewById(R.id.venue_name_q);
+            f.setText("Name");
             name.setSelected(true);
             name.setSingleLine(true);
 
@@ -151,32 +165,64 @@ public class venueFragment extends Fragment implements OnMapReadyCallback {
         if(venue.getAddress() != null){
             TextView add = view.findViewById(R.id.address);
             add.setText(venue.getAddress());
+            TextView f = view.findViewById(R.id.address_q);
+            f.setText("Address");
             add.setSelected(true);
             add.setSingleLine(true);
         }
         if(venue.state_city() != null){
             TextView city_state = view.findViewById(R.id.city_state);
             city_state.setText(venue.state_city());
+            TextView f = view.findViewById(R.id.city_q);
+            f.setText("City/State");
             city_state.setSelected(true);
             city_state.setSingleLine(true);
         }
         if(venue.getPhone() != null){
             TextView phone = view.findViewById(R.id.contact);
             phone.setText(venue.getPhone());
-        }
-        if(venue.generalRule() != null){
-            TextView general = view.findViewById(R.id.general_rule);
-            general.setText(venue.generalRule());
-        }
-        if(venue.openHour() != null){
-            TextView open_hour = view.findViewById(R.id.open_hour);
-            open_hour.setText(venue.openHour());
-        }
-        if(venue.childRule() != null){
-            TextView child = view.findViewById(R.id.child_rule);
-            child.setText(venue.childRule());
+            TextView f = view.findViewById(R.id.phone_q);
+            f.setText("Contact Info");
         }
 
+            if (venue.generalRule() != null) {
+                TextView general = view.findViewById(R.id.general_rule);
+                general.setText(venue.generalRule());
+                TextView f = view.findViewById(R.id.generalh);
+                f.setText("General Rule");
+            }
+            if (venue.openHour() != null) {
+                TextView open_hour = view.findViewById(R.id.open_hour);
+                open_hour.setText(venue.openHour());
+                TextView f = view.findViewById(R.id.openh);
+                f.setText("Open Hours");
+            }
+            if (venue.childRule() != null) {
+                TextView child = view.findViewById(R.id.child_rule);
+                child.setText(venue.childRule());
+                TextView f = view.findViewById(R.id.childh);
+                f.setText("Child Rule");
+            }
+
+
+
+    }
+    private void updateLatLongDynamic() {
+        if (googleMap != null) {
+            LatLng newLatLng = new LatLng(lat, lng);
+
+            if (mapPin != null) {
+                // Remove the existing marker
+                mapPin.remove();
+            }
+
+            // Add a marker to the new location
+            MarkerOptions markerOptions = new MarkerOptions().position(newLatLng).title("Dropped Pin");
+            mapPin = googleMap.addMarker(markerOptions);
+
+            // Move and animate the camera to the new marker
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 12f));
+        }
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -211,8 +257,11 @@ public class venueFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap map) {
-        System.out.println("lat_long"+lat_long[0] + lat_long[0]);
-        map.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(lat_long[0]), Double.parseDouble(lat_long[1]))).title("Marker"));
+        googleMap = map;
+//        geocoding();
+//        System.out.println("lat_long"+lat_long[0] + lat_long[0]);
+//        map.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(lat_long[0]), Double.parseDouble(lat_long[1]))).title("Marker"));
+    updateLatLongDynamic();
     }
 
     @Override

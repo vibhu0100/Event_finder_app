@@ -1,9 +1,16 @@
 package com.example.myapplication;
 
+import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +22,9 @@ import com.google.gson.JsonObject;
 import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -74,27 +84,119 @@ public class eventTabFragment extends Fragment {
         setEventDetails(view,data);
         return view;
     }
+    void setStatus(CardView card, TextView ticket_status,String status){
+        if(status.equals( "onsale")){
+            card.setCardBackgroundColor(Color.parseColor("#008000"));
+            ticket_status.setText("On Sale");
+        } else if (status.equals("offsale")) {
+            card.setCardBackgroundColor(Color.parseColor("#ff0000"));
+            ticket_status.setText("Off Sale");
+        }
+        else if (status.equals("postponed")) {
+            card.setCardBackgroundColor(Color.parseColor("#ffa500"));
+            ticket_status.setText("Postponed");
+
+        }
+        else if (status == "rescheduled") {
+            card.setCardBackgroundColor(Color.parseColor("#ffa500"));
+            ticket_status.setText("Rescheduled");
+
+        }
+        else if (status == "canceled") {
+            card.setCardBackgroundColor(Color.parseColor("#000000"));
+            ticket_status.setText("Canceled");
+
+        }
+    }
     public void setEventDetails(View view,String data){
+//        Map<String, String> status = new HashMap<>();
+//        status.put()
+
         Picasso picasso  = Picasso.get();
         Gson gson = new Gson();
         JsonObject x = gson.fromJson(data, JsonObject.class);
         eventRowModel event = new eventRowModel(x);
         TextView artist_team = view.findViewById(R.id.artist_teams);
-        artist_team.setText(event.getEventName());
-        TextView venue = view.findViewById(R.id.venue);
-        venue.setText(event.getVenue());
-        TextView date = view.findViewById(R.id.event_date);
-        date.setText(event.getDates2());
-        TextView time = view.findViewById(R.id.event_time);
-        time.setText(event.getTime());
-        TextView genre = view.findViewById(R.id.genre);
-        genre.setText(event.getGenreString());
-        TextView url = view.findViewById(R.id.ticket_url);
-        url.setText(event.ticket_url().toString());
-        TextView status = view.findViewById(R.id.ticket_status);
-        status.setText(event.ticket_Status());
+        if(event.getEventName()!=null){
+            TextView f = view.findViewById(R.id.artistq);
+            f.setText("Artist/Teams");
+            artist_team.setText(event.getEventName());
+        }
+        if(event.getVenue()!=null) {
+            TextView venue = view.findViewById(R.id.venue);
+            venue.setText(event.getVenue());
+            TextView f = view.findViewById(R.id.venueq);
+            f.setText("Venue");
+        }
+        if(event.getDates2()!=null) {
+            TextView date = view.findViewById(R.id.event_date);
+            date.setText(event.getDates2());
+            TextView f = view.findViewById(R.id.dateq);
+            f.setText("Date");
+        }
+        if(event.getTime()!=null) {
+            TextView time = view.findViewById(R.id.event_time);
+            time.setText(event.getTime());
+            TextView f = view.findViewById(R.id.timeq);
+            f.setText("Time");
+        }
+        if(event.getGenreString()!=null) {
+            TextView genre = view.findViewById(R.id.genre);
+            genre.setText(event.getGenreString());
+            TextView f = view.findViewById(R.id.genreq);
+            f.setText("Genre");
+        }
+        if(event.ticket_url()!=null) {
+            Uri Temp1 = event.ticket_url();
+            TextView tit8 = view.findViewById(R.id.buy_at_q);
+            TextView ans8 = view.findViewById(R.id.ticket_url);
+            if( Temp1!= null){
+
+                tit8.setVisibility(View.VISIBLE);
+                ans8.setText(Temp1.toString());
+                ans8.setSelected(true);
+
+                TextView textView = (TextView) view.findViewById(R.id.ticket_url);
+                SpannableString content = new SpannableString(Temp1.toString());
+                content.setSpan(new UnderlineSpan(), 0, content.length(), 2);
+                textView.setText(content);
+                textView.setTextColor(getResources().getColor(R.color.green)); // set text color
+                textView.setLinkTextColor(getResources().getColor(R.color.green)); // set link color
+
+                ans8.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Uri uri = Uri.parse(ans8.getText().toString());
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(intent);
+                    }
+                });
+            }else{
+                tit8.setVisibility(View.GONE);
+            }
+            TextView url = view.findViewById(R.id.ticket_url);
+//            url.setText("https://www.ticketmaster.com/ed-sheeran-x-tour-inglewood-california-09-23-2023/event/0A005D3EAC76317F");
+            TextView f = view.findViewById(R.id.buy_at_q);
+            f.setText("But Tickets at");
+
+        }
+        if(event.ticket_Status()!=null) {
+            TextView status = view.findViewById(R.id.ticket_status);
+//            status.setText(event.ticket_Status());
+            CardView card = view.findViewById(R.id.status_card);
+            setStatus(card,status,event.ticket_Status());
+            TextView f = view.findViewById(R.id.ticket_statusq);
+            f.setText("Ticket Status");
+        }
+        if(event.getPriceRange()!=null){
+            TextView fuck = view.findViewById(R.id.price_range);
+            fuck.setText(event.getPriceRange());
+            TextView f = view.findViewById(R.id.price_rangeq);
+            f.setText("Price Range");
+        }
         ImageView seat = view.findViewById(R.id.seatMap);
-        picasso.load(event.getSeatmapUrl()).resize(200,200).into(seat);
+        TextView url = view.findViewById(R.id.ticket_url);
+        picasso.load(event.getSeatmapUrl()).resize(250,250).into(seat);
         artist_team.setSingleLine(true);
         artist_team.setSelected(true);
         url.setSingleLine(true);

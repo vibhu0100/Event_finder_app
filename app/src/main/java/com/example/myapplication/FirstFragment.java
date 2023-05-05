@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -100,6 +101,8 @@ public class FirstFragment extends Fragment implements TextWatcher {
         EditText distance = view.findViewById(R.id.distance);
         EditText location = view.findViewById(R.id.location);
         Switch auto_detect = view.findViewById(R.id.autoDetect);
+
+
 //        TextView textView = view.findViewById(R.id.location_label);
         Log.d("ewws",Boolean.toString(auto_detect.isChecked()));
         if(auto_detect.isChecked()){
@@ -168,15 +171,18 @@ public class FirstFragment extends Fragment implements TextWatcher {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_first, container, false);
         Button search = view.findViewById(R.id.search);
+        Spinner category = view.findViewById(R.id.category);
+        ArrayAdapter<CharSequence> spinner_adapter = ArrayAdapter.createFromResource(requireContext(),R.array.spinner_value,R.layout.spinner_item);
+        category.setAdapter(spinner_adapter);
         Switch auto_detect = view.findViewById(R.id.autoDetect);
         autoCompleteTextView = view.findViewById(R.id.autoCompleteKeyword);
         autoCompleteTextView.addTextChangedListener(this);
         progressBar = view.findViewById(R.id.progressBar);
         requestQueue = Volley.newRequestQueue(getContext());
         Picasso picasso = Picasso.get();
-        Uri image_uri = Uri.parse("https://s1.ticketm.net/dam/a/87a/d29e1273-e290-48e1-b432-4e62e3ab987a_1256621_ARTIST_PAGE_3_2.jpg");
-        ImageView test = view.findViewById(R.id.test_image);
-        picasso.load(image_uri).into(test);
+        Uri image_uri = Uri.parse("https://s1.ticketm.net/dam/a/7d5/97b67038-f926-4676-be88-ebf94cb5c7d5_1802151_TABLET_LANDSCAPE_3_2.jpg");
+//        ImageView imageView = view.findViewById(R.id.imageView);
+//        picasso.load(image_uri).into(imageView);
         auto_detect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 autoDetect(view,auto_detect);
@@ -210,7 +216,7 @@ public class FirstFragment extends Fragment implements TextWatcher {
     }
     private void populateAutoCompleteTextView(List<String> data) {
         Log.d("POPULATE", data.toString());
-        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, data);
+        adapter = new ArrayAdapter<>(getContext(), R.layout.dropdown_item_layout, data);
         autoCompleteTextView.setAdapter(adapter);
     }
     @Override
